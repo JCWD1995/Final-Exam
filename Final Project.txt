@@ -1,0 +1,157 @@
+#!/usr/bin/perl
+
+## Author: Jiminy Cricket
+## Class: CIS 140
+## Version: 1.0
+## Purpose: Hangman
+
+use 5.16.3;
+use warnings;
+use strict;
+
+my (@letters,@solvedLetters);
+my ($word,$continue,$solve,$guess,$wrongGuess);
+
+use constant YES => 1;
+
+sub main {
+        askWord();
+        setContinue();
+        giveGuess();
+        while ($continue == YES) {
+                setSolve();
+                askWord();
+                splitWord();
+                populateSolved();
+                setWrongGuess();
+                while (($solve != YES) && ($wrongGuess < 6)) {
+                        printSolved();
+                        giveGuess();
+                        checkGuess();
+                        checkSolve();
+                }
+                if ($solve == YES) {
+                        printVictory();
+                } else {
+                        printLoss();
+                }
+                setContinue();
+        }
+}
+
+main();
+
+sub askWord {
+        if (defined $word) {
+                $word = 0;
+                while ($word !~ /^[a-zA-Z]{5,20}$/x) {
+                        say "Please enter a word with at least 5 letters.";
+                        chomp ($word = <STDIN>);
+                        if ($word !~ /^[a-zA-Z]{5,20}$/x) {
+                                say "\nINVALID INPUT";
+                                sleep 2;
+                                system ("clear");
+                        }
+                }
+        } else {
+                $word = 0;
+        }
+        system ("clear");
+}
+
+sub setContinue {
+        if (defined $continue) {
+                $continue = -1;
+                while ($continue !~ /[0-9]/ || $continue > 1 || $continue < 0) {
+                        say "Would you like to continue?";
+                        say "Enter 1 for yes and 0 for no.";
+                        chomp ($continue = <STDIN>);
+                        if ($continue !~ /[0-9]/ || $continue > 1 || $continue < 0) {
+                                say "\nINVALID INPUT";
+                                sleep 2;
+                                system ("clear");
+                        }
+                }
+        } else {
+                $continue = 1;
+        }
+}
+
+sub setSolve {
+        $solve = 0;
+}
+
+sub splitWord {
+        @letters = split('',$word);
+}
+
+sub populateSolved {
+        my $size = @letters;
+        for (my $i = 0; $i < $size; $i++) {
+                $solvedLetters[$i] = "_";
+        }
+}
+
+sub setWrongGuess {
+        $wrongGuess = 0;
+}
+
+sub printSolved {
+        my $size = @solvedLetters;
+        say "You have made $wrongGuess wrong guesses out of 6.";
+        for (my $i = 0; $i < $size; $i++) {
+                print "$solvedLetters[$i] ";
+        }
+        print "\n";
+}
+
+sub giveGuess {
+        if (defined $guess) {
+                $guess = 0;
+                while ($guess !~ /[a-z]{1}/) {
+                        say "Give one lowercase letter to guess.";
+                        chomp ($guess = <STDIN>);
+                        if ($guess !~ /[a-z]{1}/) {
+                                say "\nINVALID INPUT";
+                                sleep 2;
+                                system ("clear");
+                        }
+                }
+        } else {
+                $guess = 0;
+        }
+}
+
+sub checkGuess {
+        my $correctGuess = 0;
+        my $size = @letters;
+        for (my $i = 0; $i < $size; $i++) {
+                if ($letters[$i] eq $guess) {
+                        $solvedLetters[$i] = $guess;
+                        $correctGuess = 1;
+                }
+        }
+        if ($correctGuess == 0) {
+                $wrongGuess++;
+        }
+}
+
+sub checkSolve {
+        my $size = @letters;
+        $solve = 1;
+        for (my $i = 0; $i < $size; $i++) {
+                if ($solve == 1) {
+                        if ($letters[$i] ne $solvedLetters[$i]) {
+                                $solve = 0;
+                        }
+                }
+        }
+}
+
+sub printVictory {
+        say "YOU WIN!!!!";
+}
+
+sub printLoss {
+        say "YOU LOSE!!!!";
+}
